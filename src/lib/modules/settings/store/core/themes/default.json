@@ -1,0 +1,27 @@
+{
+  "name": "Default dark",
+  "primary": "#1f1f1f",
+  "selection": "#bbbbbb",
+  "terminal": {
+    "background": "#1f1f1f",
+    "foreground": "#bbbbbb",
+    "black": "#3a3a3a",
+    "red": "#F97583",
+    "green": "#71efb3",
+    "yellow": "#FFAB70",
+    "blue": "#9bcaff",
+    "magenta": "#B392F0",
+    "cyan": "#a0fff8",
+    "white": "#bbbbbb",
+    "orange": "#c6a679",
+    "brightBlack": "#3a3a3a",
+    "brightRed": "#F97583",
+    "brightGreen": "#71efb3",
+    "brightYellow": "#FFAB70",
+    "brightBlue": "#9bcaff",
+    "brightMagenta": "#B392F0",
+    "brightCyan": "#a0fff8",
+    "brightWhite": "#bbbbbb",
+    "brightOrange": "#ceb188"
+  }
+}
