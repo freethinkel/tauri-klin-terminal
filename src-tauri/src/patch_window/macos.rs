@@ -12,14 +12,43 @@ use objc::{
     runtime::{Object, Sel},
     sel, sel_impl,
 };
+use serde::{Deserialize, Serialize};
 use tauri::Window;
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[allow(dead_code)]
 pub enum ToolbarThickness {
     Thick,
     Medium,
     Thin,
     None,
+}
+
+#[allow(deprecated)]
+pub fn set_delegate(tauri_win: &Window) {
+    let window = tauri_win.ns_window().unwrap() as id;
+    let delegate_name = format!("window_delegate_{}", tauri_win.label());
+    let dn = delegate_name.as_str();
+
+    extern "C" fn on_enter_fullscreen(this: &Object, _cmd: Sel, _notification: id) {
+        unsafe {
+            let window: id = *this.get_ivar("window");
+            window.toolbar().setIsVisible_(NO);
+        }
+    }
+    extern "C" fn on_exit_fullscreen(this: &Object, _cmd: Sel, _notification: id) {
+        unsafe {
+            let window: id = *this.get_ivar("window");
+            window.toolbar().setIsVisible_(YES);
+        }
+    }
+    unsafe {
+        window.setDelegate_(delegate!(dn, {
+            window: id = window,
+            (windowWillEnterFullScreen:) => on_enter_fullscreen as extern fn(&Object, Sel, id),
+            (windowDidExitFullScreen:) => on_exit_fullscreen as extern fn(&Object, Sel, id)
+        }));
+    }
 }
 
 #[allow(deprecated)]
@@ -43,35 +72,17 @@ pub fn apply_toolbar(tauri_win: &Window, thickness: ToolbarThickness) {
                 tauri_win.set_title("").expect("Title wasn't set to ''");
                 window.setTitleVisibility_(NSWindowTitleVisibility::NSWindowTitleVisible);
                 make_toolbar(window);
+                show_buttons(window)
             }
             ToolbarThickness::Medium => {
                 make_toolbar(window);
+                show_buttons(window)
             }
             ToolbarThickness::Thin => {}
             ToolbarThickness::None => {
                 remove_buttons(window);
             }
         }
-        extern "C" fn on_enter_fullscreen(this: &Object, _cmd: Sel, _notification: id) {
-            unsafe {
-                let window: id = *this.get_ivar("window");
-                window.toolbar().setIsVisible_(NO);
-            }
-        }
-        extern "C" fn on_exit_fullscreen(this: &Object, _cmd: Sel, _notification: id) {
-            unsafe {
-                let window: id = *this.get_ivar("window");
-                window.toolbar().setIsVisible_(YES);
-            }
-        }
-        let delegate_name = format!("window_delegate_{}", tauri_win.label());
-        let dn = delegate_name.as_str();
-
-        window.setDelegate_(delegate!(dn, {
-            window: id = window,
-            (windowWillEnterFullScreen:) => on_enter_fullscreen as extern fn(&Object, Sel, id),
-            (windowDidExitFullScreen:) => on_exit_fullscreen as extern fn(&Object, Sel, id)
-        }));
     }
 }
 
@@ -87,22 +98,29 @@ unsafe fn make_toolbar(id: id) -> id {
 
 #[cfg(target_os = "macos")]
 unsafe fn remove_buttons(window: id) {
-    // let new_toolbar = NSToolbar::alloc(id);
-    // new_toolbar.setShowsBaselineSeparator_(NO);
-    // new_toolbar.init_();
-    // id.setToolbar_(new_toolbar);
     let close_button = window.standardWindowButton_(NSWindowButton::NSWindowCloseButton);
     let min_button = window.standardWindowButton_(NSWindowButton::NSWindowMiniaturizeButton);
     let zoom_button = window.standardWindowButton_(NSWindowButton::NSWindowZoomButton);
 
-    set_hidden(close_button);
-    set_hidden(min_button);
-    set_hidden(zoom_button);
+    set_hidden(close_button, YES);
+    set_hidden(min_button, YES);
+    set_hidden(zoom_button, YES);
 }
 
 #[cfg(target_os = "macos")]
-unsafe fn set_hidden(button: id) {
-    let _: id = msg_send![button, setHidden: YES];
+unsafe fn show_buttons(window: id) {
+    let close_button = window.standardWindowButton_(NSWindowButton::NSWindowCloseButton);
+    let min_button = window.standardWindowButton_(NSWindowButton::NSWindowMiniaturizeButton);
+    let zoom_button = window.standardWindowButton_(NSWindowButton::NSWindowZoomButton);
+
+    set_hidden(close_button, NO);
+    set_hidden(min_button, NO);
+    set_hidden(zoom_button, NO);
+}
+
+#[cfg(target_os = "macos")]
+unsafe fn set_hidden(button: id, hidden: BOOL) {
+    let _: id = msg_send![button, setHidden: hidden];
 }
 
 #[allow(dead_code)]

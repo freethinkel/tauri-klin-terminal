@@ -1,10 +1,16 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
+  export let size: "normal" | "large" = "normal";
+
   const dispatch = createEventDispatcher();
 </script>
 
-<button class="btn" type="button" on:click={() => dispatch("click")}>
+<button
+  class="btn size__{size}"
+  type="button"
+  on:click={() => dispatch("click")}
+>
   <slot />
 </button>
 
@@ -18,9 +24,16 @@
     background: none;
     display: flex;
     align-items: center;
-    justify-content: center;
+    font-size: 1rem;
+    text-align: left;
+    height: 24px;
   }
   .btn:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--color-selection12);
+  }
+
+  .size__large {
+    padding: 0 8px;
+    height: 28px;
   }
 </style>

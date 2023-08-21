@@ -1,6 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod commands;
+mod menu;
 mod patch_window;
 
 use cocoa::{
@@ -8,15 +10,11 @@ use cocoa::{
     base::{id, nil},
     foundation::{NSString, NSUserDefaults},
 };
+use commands::window::change_toolbar;
+use menu::AddDefaultSubmenus;
 use patch_window::{macos::ToolbarThickness, PatchWindow};
-use tauri::Manager;
+use tauri::{Manager, Menu};
 use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial, NSVisualEffectState};
-
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
 
 fn main() {
     let ctx = tauri::generate_context!();
@@ -31,6 +29,7 @@ fn main() {
                         "main" => window.apply_toolbar(ToolbarThickness::Medium),
                         _ => window.apply_toolbar(ToolbarThickness::Thin),
                     }
+                    window.set_delegate();
                     if label == "settings" {
                         let ns_window: id = window.ns_window().unwrap() as id;
                         unsafe {
@@ -61,7 +60,20 @@ fn main() {
             };
             Ok(())
         })
+        .invoke_handler(tauri::generate_handler![change_toolbar])
         .plugin(tauri_plugin_pty::init())
+        .menu(
+            Menu::new()
+                .add_default_app_submenu_if_macos(&ctx.package_info().name)
+                .add_default_file_submenu()
+                .add_default_edit_submenu()
+                .add_default_view_submenu()
+                .add_default_window_submenu(),
+        )
+        .on_menu_event(|event| {
+            let window = event.window();
+            let _ = window.emit("on_menu_event", event.menu_item_id());
+        })
         .run(ctx)
         .expect("error while running tauri application");
 }

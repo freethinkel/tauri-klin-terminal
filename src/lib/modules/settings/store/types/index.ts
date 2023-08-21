@@ -6,4 +6,6 @@ export type SettingsStore = {
   fontSize: number;
   fontFamily: string;
   lineHeight: number;
+  opacity: number;
+  isAutoHideToolbar: boolean;
 };

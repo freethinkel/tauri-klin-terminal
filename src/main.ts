@@ -1,8 +1,7 @@
 import "./styles.css";
-import { settings$ } from "@/modules/settings/store";
-import type { TTheme } from "@/modules/settings/store/types/theme";
-import { themeToCss } from "@/shared/helpers";
-import { appWindow } from "@tauri-apps/api/window";
+import { initTheme } from "@/shared/helpers/themes";
+import { listen } from "@tauri-apps/api/event";
+import { WebviewWindow, appWindow } from "@tauri-apps/api/window";
 
 const label = appWindow.label;
 
@@ -19,10 +18,8 @@ const apps = {
 
 apps[label]?.();
 
-const style = document.createElement("style");
-document.head.appendChild(style);
-const applyTheme = (theme: TTheme) => {
-  style.innerHTML = themeToCss(theme);
-};
-
-settings$.currentTheme.subscribe(applyTheme);
+// document.body.addEventListener("contextmenu", (event) =>
+//   event.preventDefault()
+// );
+//
+initTheme();

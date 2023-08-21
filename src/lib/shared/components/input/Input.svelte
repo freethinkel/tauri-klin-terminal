@@ -21,7 +21,14 @@
     <div class="label">{label}</div>
   {/if}
   {#if type === "range"}
-    <input {type} min="0" max="100" class="input" on:input={onChange} {value} />
+    <input
+      {type}
+      min="0"
+      max="100"
+      class="input"
+      on:input={onChange}
+      value={+value * 100}
+    />
   {:else}
     <input {type} {placeholder} class="input" on:input={onChange} {value} />
   {/if}

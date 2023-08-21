@@ -65,5 +65,8 @@
 
   .body {
     padding: 10px;
+    height: 100%;
+    overflow: auto;
+    flex: 1;
   }
 </style>

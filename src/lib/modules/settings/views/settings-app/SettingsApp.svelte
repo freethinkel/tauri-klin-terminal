@@ -3,6 +3,7 @@
   import { SettingsTab } from "../../components/tab";
   import { Themes } from "../themes";
   import { General } from "../general";
+  import { Advanced } from "../advanced";
 
   const sections = [
     {
@@ -22,6 +23,7 @@
     {
       icon: "tools",
       text: "Advanced",
+      view: Advanced,
     },
   ] as Array<never>;
 </script>
@@ -35,5 +37,7 @@
   .wrapper {
     background: var(--color-primary);
     height: 100%;
+    display: flex;
+    flex-direction: column;
   }
 </style>

@@ -24,6 +24,12 @@
         "icons/icon.ico"
       ]
     },
+    "allowlist": {
+      "all": true,
+      "globalShortcut": {
+        "all": true
+      }
+    },
     "security": {
       "csp": null
     },
@@ -43,7 +49,8 @@
         "title": "settings",
         "width": 800,
         "height": 600,
-        "transparent": true
+        "transparent": true,
+        "visible": false
       }
     ]
   }

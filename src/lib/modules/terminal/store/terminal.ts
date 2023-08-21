@@ -1,4 +1,5 @@
 import { settings$ } from "@/modules/settings/store";
+import { transparentize } from "polished";
 import { TauriPtyAddon } from "tauri-plugin-pty";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
@@ -27,6 +28,12 @@ const loadAddons = async (terminal: Terminal) => {
 
   fitAddon.fit();
 
+  settings$.subscribe(() => {
+    setTimeout(() => {
+      fitAddon.fit();
+    }, 100);
+  });
+
   ws.addEventListener("open", () => {
     fitAddon.fit();
   });
@@ -41,7 +48,7 @@ let prevAtlas: HTMLCanvasElement | null = null;
 const fixFontRender = (terminal: Terminal) => {
   prevAtlas?.remove();
   const atlas = (terminal as any)._core._renderService._renderer._charAtlas;
-  document.body.appendChild(atlas._tmpCanvas);
+  document.body.appendChild(atlas?._tmpCanvas);
   terminal.clearTextureAtlas();
   atlas._tmpCanvas.style.display = "none";
   prevAtlas = atlas._tmpCanvas;
@@ -49,23 +56,46 @@ const fixFontRender = (terminal: Terminal) => {
 
 export const createTerminal = (): Terminal => {
   const terminal = new Terminal({
-    fontFamily: `Iosevka Nerd Font`,
-    fontSize: 14,
-    lineHeight: 1.6,
+    fontFamily: `${settings$.fontFamily.get()}, Menlo`,
+    fontSize: settings$.fontSize.get(),
+    lineHeight: settings$.lineHeight.get(),
     allowProposedApi: true,
     allowTransparency: true,
     customGlyphs: true,
     theme: settings$.currentTheme.get().terminal,
   });
 
+  terminal.options.theme.background = transparentize(
+    1,
+    terminal.options.theme.background
+  );
+
   settings$.currentTheme.listen((theme) => {
-    terminal.options.theme = theme.terminal;
+    terminal.options.theme = {
+      ...theme.terminal,
+      background: transparentize(1, theme.terminal.background),
+    };
+    // setTimeout(() => {
+    //   terminal.options.theme.background = transparentize(
+    //     1,
+    //     theme.terminal.background
+    //   );
+    // }, 10);
+  });
+  settings$.lineHeight.listen((value) => {
+    terminal.options.lineHeight = value;
+  });
+  settings$.fontSize.listen((value) => {
+    terminal.options.fontSize = value;
+  });
+  settings$.fontFamily.listen((value) => {
+    terminal.options.fontFamily = value;
   });
 
   settings$.listen(() =>
     setTimeout(() => {
       fixFontRender(terminal);
-    })
+    }, 10)
   );
 
   setTimeout(() => {
@@ -74,7 +104,7 @@ export const createTerminal = (): Terminal => {
 
   setTimeout(() => {
     fixFontRender(terminal);
-  }, 10);
+  }, 50);
 
   return terminal;
 };
