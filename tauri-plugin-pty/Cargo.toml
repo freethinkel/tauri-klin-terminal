@@ -10,6 +10,9 @@ exclude = ["/examples", "/webview-dist", "/webview-src", "node_modules"]
 [dependencies]
 tauri = { version = "1.4.1" }
 serde = "1.0"
+warp = "0.3.5"
+portable-pty = "0.8.1"
+
 simple-websockets = "0.1.5"
 thiserror = "1.0"
 actix-service = "0.4.2"
