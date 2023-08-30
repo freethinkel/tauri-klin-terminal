@@ -1,7 +1,7 @@
 import { settings$ } from "@/modules/settings/store";
 import type { TTheme } from "@/modules/settings/store/types/theme";
 import { computed } from "nanostores";
-import { darken, transparentize } from "polished";
+import { darken, mix, transparentize } from "polished";
 
 export const themeToCss = (theme: TTheme) => {
   return `:root {
@@ -35,9 +35,20 @@ const listenOpacity = () => {
     opacity,
     color: theme.primary,
   })).subscribe(({ opacity, color }) => {
+    const background = transparentize(1 - opacity, color);
     style.innerHTML = `
 :root {
---color-background: ${transparentize(1 - opacity, color)};
+--color-background: ${background};
+--color-gradient-start: ${mix(
+      0.88,
+      background,
+      transparentize(1 - opacity, "#ffffff")
+    )};
+--color-gradient-end: ${mix(
+      1,
+      background,
+      transparentize(1 - opacity, "#ffffff")
+    )};
 }
 `;
   });

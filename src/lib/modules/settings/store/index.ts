@@ -11,9 +11,15 @@ const DEFAULT: SettingsStore = {
   lineHeight: 1.1,
   opacity: 1,
   isAutoHideToolbar: false,
+  isEnabledFancyBackground: false,
+  isEnabledTerminalContextMenu: true,
 };
 
-const store = createSharedAtom("settings", { ...DEFAULT });
+const store = createSharedAtom(
+  "settings",
+  { ...DEFAULT },
+  { restoreMap: (store) => ({ ...store, themes: DEFAULT.themes }) },
+);
 
 const useChangeKey =
   <K extends keyof SettingsStore>(key: K) =>
@@ -25,9 +31,17 @@ export const settings$ = {
   listen: store.listen,
   themes: computed(store, (value) => value.themes),
   currentTheme: computed(store, (value) =>
-    value.themes.find((theme) => theme.name === value.currentThemeName)
+    value.themes.find((theme) => theme.name === value.currentThemeName),
   ),
   isAutoHideToolbar: computed(store, (value) => value.isAutoHideToolbar),
+  isEnabledFancyBackground: computed(
+    store,
+    (value) => value.isEnabledFancyBackground,
+  ),
+  isEnabledTerminalContextMenu: computed(
+    store,
+    (value) => value.isEnabledTerminalContextMenu,
+  ),
   fontFamily: computed(store, (value) => value.fontFamily),
   fontSize: computed(store, (value) => value.fontSize),
   lineHeight: computed(store, (value) => value.lineHeight),

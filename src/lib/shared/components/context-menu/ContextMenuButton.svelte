@@ -8,7 +8,11 @@
   const dispatch = createEventDispatcher();
 </script>
 
-<Button size="large" on:click={() => dispatch("click")}>
+<Button
+  size="large"
+  on:mouseup={({ detail }) => detail.button === 2 && dispatch("click")}
+  on:click={() => dispatch("click")}
+>
   <div class="inner">
     {#if icon}
       <Icon name={icon} />

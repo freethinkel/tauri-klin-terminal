@@ -9,9 +9,15 @@
     position.y = event.y;
     isOpen = true;
   };
+
+  const close = () => {
+    isOpen = false;
+  };
 </script>
 
-<svelte:body on:mousedown={() => (isOpen = false)} />
+<svelte:window on:blur={close} />
+
+<svelte:body on:mousedown={close} />
 
 <div class="wrapper">
   <div

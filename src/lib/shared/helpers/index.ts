@@ -1,17 +1,29 @@
-import type { TTheme } from "@/modules/settings/store/types/theme";
 import { emit, listen } from "@tauri-apps/api/event";
 import { appWindow } from "@tauri-apps/api/window";
 import { platform } from "@tauri-apps/api/os";
 import { atom } from "nanostores";
-import { transparentize } from "polished";
 
-export const createSharedAtom = <T>(name: string, initialValue: T) => {
+type Options<T> = {
+  invalidate?: (store: T) => boolean;
+  restoreMap?: (store: T) => T;
+};
+
+export const createSharedAtom = <T>(
+  name: string,
+  initialValue: T,
+  options?: Options<T>
+) => {
   const key = `oshmes_terminal__${name}`;
   const store = atom(initialValue);
 
   try {
     if (localStorage.getItem(key)) {
-      store.set(JSON.parse(localStorage.getItem(key) || "") as T);
+      const cachedValue = JSON.parse(localStorage.getItem(key) || "") as T;
+      if (!options?.invalidate?.(cachedValue)) {
+        store.set(
+          options?.restoreMap ? options?.restoreMap(cachedValue) : cachedValue
+        );
+      }
     }
   } catch (_) {}
 

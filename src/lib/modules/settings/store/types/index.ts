@@ -8,4 +8,6 @@ export type SettingsStore = {
   lineHeight: number;
   opacity: number;
   isAutoHideToolbar: boolean;
+  isEnabledFancyBackground: boolean;
+  isEnabledTerminalContextMenu: boolean;
 };

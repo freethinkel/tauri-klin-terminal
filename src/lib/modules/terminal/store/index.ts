@@ -1,13 +1,13 @@
 import { atom, computed } from "nanostores";
 import { nanoid } from "nanoid";
-import type { TerminalTab } from "./types";
+import { TerminalController, type TerminalTab } from "./types";
 import { settings$ } from "@/modules/settings/store";
 import { createTerminal } from "./terminal";
 
 const createTab = (): TerminalTab => {
   return {
     id: nanoid(),
-    children: [createTerminal()],
+    terminalController: new TerminalController(createTerminal()),
   };
 };
 
@@ -36,6 +36,10 @@ export const tabs$ = {
     });
   },
   selectTab(id: string) {
+    setTimeout(() => {
+      const tab = store.get().tabs.find((tab) => tab.id === id);
+      tab.terminalController.focus();
+    });
     store.set({ ...store.get(), currentTabId: id });
   },
   closeTab(id: string) {
@@ -56,6 +60,10 @@ export const tabs$ = {
       ...store.get(),
       tabs: [...store.get().tabs, newTab],
       currentTabId: newTab.id,
+    });
+
+    setTimeout(() => {
+      newTab.terminalController.focus();
     });
   },
 };

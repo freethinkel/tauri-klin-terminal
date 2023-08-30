@@ -9,6 +9,7 @@
 <button
   class="btn size__{size}"
   type="button"
+  on:mouseup={(event) => dispatch("mouseup", event)}
   on:click={() => dispatch("click")}
 >
   <slot />

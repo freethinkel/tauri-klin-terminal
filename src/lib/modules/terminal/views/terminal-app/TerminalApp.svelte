@@ -9,11 +9,15 @@
   import { onMount } from "svelte";
   import { settings$ } from "@/modules/settings/store";
   import { invoke } from "@tauri-apps/api";
+  import { Gradient } from "@/modules/terminal/components/gradient";
+  import { TabView } from "../tab-view";
 
   const tabs = tabs$.tabs;
   const currentTab = tabs$.currentTab;
   let platform = "browser";
   const isAutoHideToolbar = settings$.isAutoHideToolbar;
+  const isEnabledFancyBackground = settings$.isEnabledFancyBackground;
+
   onMount(async () => {
     platform = await getPlatform();
     isAutoHideToolbar.subscribe((value) => {
@@ -23,6 +27,9 @@
 </script>
 
 <div class="wrapper">
+  {#if $isEnabledFancyBackground}
+    <Gradient />
+  {/if}
   <div
     class="tabs"
     class:auto_hide_toolbar={$isAutoHideToolbar}
@@ -44,23 +51,15 @@
   <div class="view">
     {#each $tabs as tab}
       {#key tab.id}
-        <div class="tab_view" class:active={tab.id === $currentTab.id}>
-          {#each tab.children as terminal}
-            <TerminalContextMenu>
-              <Terminal
-                {terminal}
-                on:change_title={({ detail }) => tabs$.setTitle(tab.id, detail)}
-              />
-            </TerminalContextMenu>
-            <!-- </ContextMenu> -->
-          {/each}
-        </div>
+        {#if tab.id === $currentTab.id}
+          <TabView {tab} />
+        {/if}
       {/key}
     {/each}
   </div>
 </div>
 
-<style>
+<style lang="postcss">
   .wrapper {
     height: 100%;
     display: flex;
@@ -72,6 +71,7 @@
     display: flex;
     gap: 4px;
     background: var(--color-background);
+    z-index: 1111;
   }
   .auto_hide_toolbar {
     position: fixed;
@@ -103,15 +103,7 @@
     flex-grow: 1;
     min-height: 0;
     display: flex;
-    background: var(--color-background);
-  }
-  .tab_view {
-    display: none;
-    flex-grow: 1;
-    width: 100%;
-  }
-  .tab_view.active {
-    display: flex;
+    background-color: var(--color-background);
   }
   .add_tab {
     --size: 18px;
