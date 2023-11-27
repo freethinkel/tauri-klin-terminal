@@ -1,7 +1,6 @@
 import "./styles.css";
 import { initTheme } from "@/shared/helpers/themes";
-import { listen } from "@tauri-apps/api/event";
-import { WebviewWindow, appWindow } from "@tauri-apps/api/window";
+import { appWindow } from "@tauri-apps/api/window";
 
 const label = appWindow.label;
 
@@ -20,8 +19,4 @@ const apps = {
 
 apps[label]?.();
 
-// document.body.addEventListener("contextmenu", (event) =>
-//   event.preventDefault()
-// );
-//
 initTheme();
