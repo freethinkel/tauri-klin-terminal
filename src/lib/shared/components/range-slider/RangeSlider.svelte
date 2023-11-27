@@ -11,7 +11,6 @@
   const dispatch = createEventDispatcher();
 
   const onMouseDown = (event: MouseEvent) => {
-    console.log(event);
     isDragging = true;
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
