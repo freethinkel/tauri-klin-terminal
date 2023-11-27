@@ -18,6 +18,7 @@ export class TauriPtyAddon implements ITerminalAddon {
 
   constructor(socket: WebSocket, options?: Options) {
     this.socket = socket;
+    this.socket.binaryType = "arraybuffer";
     this.options = options || {};
   }
   private _init() {
@@ -32,12 +33,15 @@ export class TauriPtyAddon implements ITerminalAddon {
     this.socket.addEventListener("error", () => this.deatach());
   }
 
-  private _setSize(size: { rows: number; cols: number }) {
-    this.socket.send(JSON.stringify(["set_size", size.rows, size.cols]));
+  private _setSize({ cols, rows }: { rows: number; cols: number }) {
+    const data = new TextEncoder().encode(
+      "\x01" + JSON.stringify({ cols, rows })
+    );
+    this.socket.send(data);
   }
 
   private _sendData(data: string) {
-    this.socket.send(JSON.stringify(["stdin", data]));
+    this.socket.send(new TextEncoder().encode("\x00" + data));
   }
 
   private _flushBuffer() {
@@ -54,14 +58,22 @@ export class TauriPtyAddon implements ITerminalAddon {
     }
   }
 
-  private _getMessage(ev: MessageEvent) {
-    const data = JSON.parse(ev.data);
-    if (data[0] === "stdout") {
+  _arrayBufferToString(buf: ArrayBuffer) {
+    return String.fromCharCode.apply("", new Uint8Array(buf) as any);
+  }
+
+  private async _getMessage(ev: MessageEvent): Promise<void> {
+    try {
+      const bytes = new Uint8Array(ev.data);
+      const data = new TextDecoder("utf-8").decode(bytes).replace(/�/gim, "");
+
       if (this.options!.buffered) {
-        this._pushToBuffer(data[1]);
+        this._pushToBuffer(data);
       } else {
-        this.terminal!.write(data[1]);
+        this.terminal!.write(data);
       }
+    } catch (err) {
+      console.log(err);
     }
   }
 

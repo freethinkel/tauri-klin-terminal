@@ -33,7 +33,7 @@
   <SettingsTab {sections} />
 </div>
 
-<style>
+<style lang="postcss">
   .wrapper {
     background: var(--color-primary);
     height: 100%;

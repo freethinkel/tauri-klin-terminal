@@ -10,24 +10,16 @@ exclude = ["/examples", "/webview-dist", "/webview-src", "node_modules"]
 [dependencies]
 tauri = { version = "1.4.1" }
 serde = "1.0"
-warp = "0.3.5"
-portable-pty = "0.8.1"
+serde_json = "1.0"
+tokio = { version = "1.20.1", features = ["full"] }
+portable-pty = "0.8.0"
+bytes = "1.1.0"
+futures = "0.3"
+futures-util = "0.3.8"
+tokio-tungstenite = "0.18.0"
+mt_logger = "3.0.2"
 
-simple-websockets = "0.1.5"
-thiserror = "1.0"
-actix-service = "0.4.2"
-actix-web-actors = "1.0.2"
-actix-web= "1.0.8"
-actix= "0.8.3"
-futures = "0.1.29"
-
-lazy_static = "1.4.0"
-libc = "0.2.66"
-log = "0.4.8"
-pretty_env_logger = "0.3.1"
-serde_json = "1.0.44"
-structopt = "0.3.7"
-tokio = "0.1.22"
-tokio-codec= "0.1.1"
-tokio-io= "0.1.12"
-tokio-pty-process = "0.4"
+[target."cfg(target_os = \"macos\")".dependencies]
+cocoa = "0.24.1"
+objc = "0.2"
+core-foundation = "0.9.3"

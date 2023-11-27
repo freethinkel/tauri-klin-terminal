@@ -8,5 +8,6 @@
   .icon {
     font-size: var(--size, 24px);
     color: var(--color, inherit);
+    font-weight: 100;
   }
 </style>

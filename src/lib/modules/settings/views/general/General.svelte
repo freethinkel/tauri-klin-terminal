@@ -2,6 +2,9 @@
   import { Input } from "@/shared/components/input";
   import { settings$ } from "../../store";
   import RangeSlider from "@/shared/components/range-slider/RangeSlider.svelte";
+  import { SettingsCard } from "../../components/settings-card";
+  import { ControlInput } from "../../components/control-input";
+  import { ControlSlider } from "../../components/control-slider";
 
   const fontFamily = settings$.fontFamily;
   const fontSize = settings$.fontSize;
@@ -9,48 +12,39 @@
   const opacity = settings$.opacity;
 </script>
 
-<div class="form-field">
-  <Input
+<SettingsCard title="Text">
+  <ControlInput
+    title="Font family"
+    placeholder="Enter font family"
+    value={$fontFamily}
+    on:change={({ detail }) => settings$.handleChange("fontFamily")(detail)}
+  />
+  <ControlInput
+    title="Font size"
+    type="number"
     value={$fontSize.toString()}
+    min={1}
+    max={25}
+    step={1}
     on:change={({ detail }) =>
       settings$.handleChange("fontSize")(Number(detail) || 13)}
-    label="Font size"
-    placeholder="Enter font size"
   />
-  <Input
+  <ControlInput
+    title="Line height"
+    type="number"
+    min={0.5}
+    max={5}
+    step={0.1}
     value={$lineHeight.toString()}
     on:change={({ detail }) =>
       settings$.handleChange("lineHeight")(Number(detail) || 1)}
-    label="Line height"
-    placeholder="Enter line height"
   />
-</div>
-<div class="form-field">
-  <Input
-    value={$fontFamily}
-    on:change={({ detail }) => settings$.handleChange("fontFamily")(detail)}
-    label="Font family"
-    placeholder="Enter font family"
-  />
-</div>
-<div class="form-field">
-  <RangeSlider
+</SettingsCard>
+<SettingsCard title="Background">
+  <ControlSlider
+    title="Opacity"
     value={$opacity}
+    showValue={Math.ceil($opacity * 100).toString()}
     on:change={({ detail }) => settings$.handleChange("opacity")(detail)}
-    label="Opacity"
   />
-</div>
-
-<style>
-  .form-field {
-    display: flex;
-    width: 100%;
-    gap: 6px;
-  }
-  .form-field + .form-field {
-    margin-top: 10px;
-  }
-  .form-field > :global(*) {
-    flex: 1;
-  }
-</style>
+</SettingsCard>

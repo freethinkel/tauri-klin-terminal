@@ -1,33 +1,24 @@
 <script lang="ts">
   import { Toggle } from "@/shared/components/toggle";
   import { settings$ } from "../../store";
+  import { ControlSwitch } from "../../components/control-switch";
+  import { SettingsCard } from "../../components/settings-card";
 
   const isAutohide = settings$.isAutoHideToolbar;
   const isEnabledTerminalContextMenu = settings$.isEnabledTerminalContextMenu;
 </script>
 
-<div class="field">
-  <Toggle
-    checked={$isAutohide}
+<SettingsCard>
+  <ControlSwitch
+    value={$isAutohide}
     on:change={({ detail }) =>
       settings$.handleChange("isAutoHideToolbar")(detail)}
-  >
-    Auto hide toolbar
-  </Toggle>
-</div>
-
-<div class="field">
-  <Toggle
-    checked={!$isEnabledTerminalContextMenu}
+    title="Auto hide toolbar"
+  />
+  <ControlSwitch
+    value={!$isEnabledTerminalContextMenu}
     on:change={({ detail }) =>
       settings$.handleChange("isEnabledTerminalContextMenu")(!detail)}
-  >
-    Disable context menu
-  </Toggle>
-</div>
-
-<style>
-  .field {
-    margin-top: 6px;
-  }
-</style>
+    title="Disable context menu"
+  />
+</SettingsCard>

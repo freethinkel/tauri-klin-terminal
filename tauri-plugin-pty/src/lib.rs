@@ -1,27 +1,20 @@
-#[macro_use]
-extern crate serde_json;
-#[macro_use]
-extern crate log;
+mod pty;
 
-use actix_web::{App, HttpServer};
-use serde::{ser::Serializer, Serialize};
-use socket_term::launch;
+use pty::ws_server::pty_serve;
+
 use tauri::{
     plugin::{Builder, TauriPlugin},
     Runtime,
 };
-use webterm::WebTermExt;
-
-use std::{env, process::Command};
-mod event;
-mod socket_term;
-mod terminado;
-mod webterm;
 
 /// Initializes the plugin.
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("pty")
         .setup(|app| {
+            std::thread::spawn(|| {
+                let rt = tokio::runtime::Runtime::new().unwrap();
+                rt.block_on(async { pty_serve().await });
+            });
             // tauri::async_runtime::spawn(async {
             //     HttpServer::new(|| {
             //         App::new().webterm_socket("/websocket", |_req| {

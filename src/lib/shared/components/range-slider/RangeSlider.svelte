@@ -20,6 +20,7 @@
     isDragging = false;
     window.removeEventListener("mousemove", onMouseMove);
     window.removeEventListener("mouseup", onMouseMove);
+    _currentValue = value;
   };
   const onMouseMove = (event: MouseEvent) => {
     const x = event.clientX;
@@ -60,6 +61,7 @@
     top: calc(var(--size) / 2 - 2px);
     height: 3px;
     background: var(--color-selection12);
+    border-radius: 10em;
   }
   .line::before {
     content: "";
@@ -69,6 +71,7 @@
     top: 0;
     width: calc(var(--value) * 100%);
     background: var(--color-accent);
+    border-radius: 10em;
   }
   .circle {
     width: var(--size);

@@ -11,9 +11,9 @@ type Options<T> = {
 export const createSharedAtom = <T>(
   name: string,
   initialValue: T,
-  options?: Options<T>
+  options?: Options<T>,
 ) => {
-  const key = `oshmes_terminal__${name}`;
+  const key = `klin_terminal__${name}`;
   const store = atom(initialValue);
 
   try {
@@ -21,7 +21,7 @@ export const createSharedAtom = <T>(
       const cachedValue = JSON.parse(localStorage.getItem(key) || "") as T;
       if (!options?.invalidate?.(cachedValue)) {
         store.set(
-          options?.restoreMap ? options?.restoreMap(cachedValue) : cachedValue
+          options?.restoreMap ? options?.restoreMap(cachedValue) : cachedValue,
         );
       }
     }

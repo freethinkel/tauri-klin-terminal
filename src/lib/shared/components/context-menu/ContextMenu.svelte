@@ -1,10 +1,15 @@
 <script lang="ts">
   import { slide } from "svelte/transition";
 
+  export let disabled = false;
+
   let isOpen = false;
   let position = { x: 0, y: 0 };
 
   const onContextMenu = (event: MouseEvent) => {
+    if (disabled) {
+      return;
+    }
     position.x = event.x;
     position.y = event.y;
     isOpen = true;

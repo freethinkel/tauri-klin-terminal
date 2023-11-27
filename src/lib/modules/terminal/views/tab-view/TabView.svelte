@@ -11,23 +11,23 @@
 
 <TerminalContextMenu>
   <SplitPane>
-    <Pane>
-      <SplitPane axis="horizontal">
-        <Pane>
-          <div>
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facere,
-            neque.
-          </div>
-        </Pane>
-        <Pane>
-          <div>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Alias,
-            dignissimos inventore consequatur officia temporibus tempora culpa
-            quas eum obcaecati vel?
-          </div>
-        </Pane>
-      </SplitPane>
-    </Pane>
+    <!-- <Pane> -->
+    <!--   <SplitPane axis="horizontal"> -->
+    <!--     <Pane> -->
+    <!--       <div> -->
+    <!--         Lorem ipsum, dolor sit amet consectetur adipisicing elit. Facere, -->
+    <!--         neque. -->
+    <!--       </div> -->
+    <!--     </Pane> -->
+    <!--     <Pane> -->
+    <!--       <div> -->
+    <!--         Lorem ipsum dolor sit amet consectetur adipisicing elit. Alias, -->
+    <!--         dignissimos inventore consequatur officia temporibus tempora culpa -->
+    <!--         quas eum obcaecati vel? -->
+    <!--       </div> -->
+    <!--     </Pane> -->
+    <!--   </SplitPane> -->
+    <!-- </Pane> -->
     <Pane>
       <Terminal
         terminal={tab.terminalController.terminal}

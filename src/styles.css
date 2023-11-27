@@ -22,6 +22,7 @@ body {
   height: 100vh;
   overflow: hidden;
   color: var(--color-terminal-foreground);
+  user-select: none !important;
 }
 
 .gradient {

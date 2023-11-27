@@ -11,17 +11,17 @@ type LoadTerminalOption = {
 };
 
 const loadAddons = async (terminal: Terminal) => {
-  const ws = new WebSocket("ws://localhost:8080/websocket");
+  const ws = new WebSocket("ws://127.0.0.1:7703");
   const fitAddon = new FitAddon();
 
-  const tauriPtyAddon = new TauriPtyAddon(ws, { buffered: true });
+  const tauriPtyAddon = new TauriPtyAddon(ws);
   const webglAddon = new WebglAddon(false);
-  const ligaturesAddon = new LigaturesAddon();
+  // const ligaturesAddon = new LigaturesAddon();
 
   terminal.loadAddon(webglAddon);
   terminal.loadAddon(tauriPtyAddon);
   terminal.loadAddon(fitAddon);
-  terminal.loadAddon(ligaturesAddon);
+  // terminal.loadAddon(ligaturesAddon);
 
   await new Promise((resolve, reject) => {
     ws.addEventListener("open", () => resolve(null));
@@ -50,12 +50,16 @@ const loadAddons = async (terminal: Terminal) => {
 let prevAtlas: HTMLCanvasElement | null = null;
 
 const fixFontRender = (terminal: Terminal) => {
-  prevAtlas?.remove();
-  const atlas = (terminal as any)._core._renderService._renderer._charAtlas;
-  document.body.appendChild(atlas?._tmpCanvas);
-  terminal.clearTextureAtlas();
-  atlas._tmpCanvas.style.display = "none";
-  prevAtlas = atlas._tmpCanvas;
+  try {
+    prevAtlas?.remove();
+    const atlas = (terminal as any)._core._renderService._renderer._charAtlas;
+    document.body.appendChild(atlas?._tmpCanvas);
+    terminal.clearTextureAtlas();
+    atlas._tmpCanvas.style.display = "none";
+    prevAtlas = atlas._tmpCanvas;
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 export const createTerminal = (options: LoadTerminalOption): Terminal => {
@@ -66,12 +70,15 @@ export const createTerminal = (options: LoadTerminalOption): Terminal => {
     allowProposedApi: true,
     allowTransparency: true,
     customGlyphs: true,
+    macOptionIsMeta: true,
     theme: settings$.currentTheme.get().terminal,
+    // minimumContrastRatio: 20,
   });
+  // terminal.options.theme.background = "transparent";
 
   terminal.options.theme.background = transparentize(
     1,
-    terminal.options.theme.background
+    terminal.options.theme.background,
   );
 
   settings$.currentTheme.listen((theme) => {
@@ -93,7 +100,7 @@ export const createTerminal = (options: LoadTerminalOption): Terminal => {
   settings$.listen(() =>
     setTimeout(() => {
       fixFontRender(terminal);
-    }, 10)
+    }, 10),
   );
 
   setTimeout(() => {

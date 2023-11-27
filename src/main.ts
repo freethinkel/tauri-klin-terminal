@@ -8,11 +8,13 @@ const label = appWindow.label;
 const apps = {
   main: () =>
     import("@/core/app/Main.svelte").then(
-      (module) => new module.default({ target: document.getElementById("app") })
+      (module) =>
+        new module.default({ target: document.getElementById("app") }),
     ),
   settings: () =>
     import("@/core/app/Settings.svelte").then(
-      (module) => new module.default({ target: document.getElementById("app") })
+      (module) =>
+        new module.default({ target: document.getElementById("app") }),
     ),
 };
 
