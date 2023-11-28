@@ -12,7 +12,7 @@ export declare class TauriPtyAddon implements ITerminalAddon {
     constructor(socket: WebSocket, options?: Options);
     private _init;
     private _setSize;
-    private _sendData;
+    sendData(data: string): void;
     private _flushBuffer;
     private _pushToBuffer;
     _arrayBufferToString(buf: ArrayBuffer): string;

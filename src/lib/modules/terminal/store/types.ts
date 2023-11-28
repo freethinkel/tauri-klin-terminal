@@ -1,5 +1,6 @@
 import { nanoid } from "nanoid";
-import type { Terminal } from "xterm";
+import { TauriPtyAddon } from "tauri-plugin-pty";
+import type { ITerminalAddon, Terminal } from "xterm";
 
 export type TerminalTab = {
   id: string;
@@ -13,6 +14,14 @@ export class TerminalController {
   id: string = nanoid();
 
   terminal: Terminal;
+
+  get addons() {
+    return (
+      this.terminal as unknown as {
+        _addonManager: { _addons: (ITerminalAddon & { instance: unknown })[] };
+      }
+    )._addonManager._addons;
+  }
 
   constructor(terminal: Terminal) {
     this.terminal = terminal;
@@ -35,5 +44,12 @@ export class TerminalController {
   async copySelectedText(): Promise<void> {
     const selection = this.terminal.getSelection();
     await navigator.clipboard.writeText(selection);
+  }
+
+  sendChars(chars: string) {
+    const addon = this.addons.find(
+      (addon) => addon.instance instanceof TauriPtyAddon,
+    )?.instance as TauriPtyAddon | undefined;
+    addon?.sendData(chars);
   }
 }

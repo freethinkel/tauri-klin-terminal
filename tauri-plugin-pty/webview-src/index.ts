@@ -24,10 +24,10 @@ export class TauriPtyAddon implements ITerminalAddon {
   private _init() {
     this.socket.addEventListener("message", (data) => this._getMessage(data));
     if (this.bidirectional) {
-      this.terminal!.onData((data: string) => this._sendData(data));
+      this.terminal!.onData((data: string) => this.sendData(data));
     }
     this.terminal!.onResize((data: { cols: number; rows: number }) =>
-      this._setSize(data)
+      this._setSize(data),
     );
     this.socket.addEventListener("close", () => this.deatach());
     this.socket.addEventListener("error", () => this.deatach());
@@ -35,12 +35,12 @@ export class TauriPtyAddon implements ITerminalAddon {
 
   private _setSize({ cols, rows }: { rows: number; cols: number }) {
     const data = new TextEncoder().encode(
-      "\x01" + JSON.stringify({ cols, rows })
+      "\x01" + JSON.stringify({ cols, rows }),
     );
     this.socket.send(data);
   }
 
-  private _sendData(data: string) {
+  sendData(data: string) {
     this.socket.send(new TextEncoder().encode("\x00" + data));
   }
 

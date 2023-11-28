@@ -1,26 +1,33 @@
 import { emit, listen } from "@tauri-apps/api/event";
 import { appWindow } from "@tauri-apps/api/window";
 import { platform } from "@tauri-apps/api/os";
-import { atom } from "nanostores";
+import { createEvent, createStore, sample } from "effector";
 
 type Options<T> = {
   invalidate?: (store: T) => boolean;
   restoreMap?: (store: T) => T;
 };
 
-export const createSharedAtom = <T>(
+export const createSharedStore = <T>(
   name: string,
   initialValue: T,
   options?: Options<T>,
 ) => {
   const key = `klin_terminal__${name}`;
-  const store = atom(initialValue);
+  const store = createStore(initialValue);
+
+  const valueSetted = createEvent<T>();
+
+  sample({
+    clock: valueSetted,
+    target: store,
+  });
 
   try {
     if (localStorage.getItem(key)) {
       const cachedValue = JSON.parse(localStorage.getItem(key) || "") as T;
       if (!options?.invalidate?.(cachedValue)) {
-        store.set(
+        valueSetted(
           options?.restoreMap ? options?.restoreMap(cachedValue) : cachedValue,
         );
       }
@@ -29,7 +36,7 @@ export const createSharedAtom = <T>(
 
   let broadcast = true;
 
-  store.listen((value) => {
+  store.watch((value) => {
     if (broadcast) {
       emit(key, value);
     }
@@ -39,7 +46,7 @@ export const createSharedAtom = <T>(
   listen(key, (data) => {
     if (data.windowLabel !== appWindow.label) {
       broadcast = false;
-      store.set(data.payload as T);
+      valueSetted(data.payload as T);
       broadcast = true;
     }
   });

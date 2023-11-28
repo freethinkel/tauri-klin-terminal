@@ -1,14 +1,13 @@
 <script>
-  import { settings$ } from "@/modules/settings/store";
+  import { isEnabledTerminalContextMenu$ } from "@/modules/settings/store";
   import { ContextMenu } from "@/shared/components/context-menu";
 
   const env = process.env.NODE_ENV;
-  const isEnabledTerminalContextMenu = settings$.isEnabledTerminalContextMenu;
+  const isEnabledTerminalContextMenu = isEnabledTerminalContextMenu$;
 </script>
 
 <ContextMenu disabled={!$isEnabledTerminalContextMenu}>
   <div slot="menu">
-    {JSON.stringify(!$isEnabledTerminalContextMenu)}
     {#if env === "development"}
       <ContextMenu.Button
         on:click={() => window.location.reload()}

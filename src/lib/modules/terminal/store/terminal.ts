@@ -1,14 +1,18 @@
-import { settings$ } from "@/modules/settings/store";
+import {
+  currentTheme$,
+  fontFamily$,
+  fontSize$,
+  lineHeight$,
+  settings$,
+  zoomLevel$,
+} from "@/modules/settings/store";
 import { transparentize } from "polished";
 import { TauriPtyAddon } from "tauri-plugin-pty";
-import { Terminal, type ITerminalAddon } from "xterm";
+import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
-import { LigaturesAddon } from "xterm-addon-ligatures";
 import { WebglAddon } from "xterm-addon-webgl";
-
-type LoadTerminalOption = {
-  getAddons: () => ITerminalAddon[];
-};
+import { Unicode11Addon } from "xterm-addon-unicode11";
+import { combine } from "effector";
 
 const loadAddons = async (terminal: Terminal) => {
   const ws = new WebSocket("ws://127.0.0.1:7703");
@@ -16,11 +20,13 @@ const loadAddons = async (terminal: Terminal) => {
 
   const tauriPtyAddon = new TauriPtyAddon(ws);
   const webglAddon = new WebglAddon(false);
+  const unicodeAddon = new Unicode11Addon();
   // const ligaturesAddon = new LigaturesAddon();
 
   terminal.loadAddon(webglAddon);
   terminal.loadAddon(tauriPtyAddon);
   terminal.loadAddon(fitAddon);
+  terminal.loadAddon(unicodeAddon);
   // terminal.loadAddon(ligaturesAddon);
 
   await new Promise((resolve, reject) => {
@@ -62,16 +68,16 @@ const fixFontRender = (terminal: Terminal) => {
   }
 };
 
-export const createTerminal = (options: LoadTerminalOption): Terminal => {
+export const createTerminal = (): Terminal => {
   const terminal = new Terminal({
-    fontFamily: `${settings$.fontFamily.get()}, Menlo`,
-    fontSize: settings$.fontSize.get(),
-    lineHeight: settings$.lineHeight.get(),
+    fontFamily: `${fontFamily$.getState()}, Menlo`,
+    fontSize: fontSize$.getState(),
+    lineHeight: lineHeight$.getState(),
     allowProposedApi: true,
     allowTransparency: true,
     customGlyphs: true,
     macOptionIsMeta: true,
-    theme: settings$.currentTheme.get().terminal,
+    theme: currentTheme$.getState().terminal,
     // minimumContrastRatio: 20,
   });
   // terminal.options.theme.background = "transparent";
@@ -81,23 +87,24 @@ export const createTerminal = (options: LoadTerminalOption): Terminal => {
     terminal.options.theme.background,
   );
 
-  settings$.currentTheme.listen((theme) => {
+  currentTheme$.watch((theme) => {
     terminal.options.theme = {
       ...theme.terminal,
       background: transparentize(1, theme.terminal.background),
     };
   });
-  settings$.lineHeight.listen((value) => {
+  lineHeight$.watch((value) => {
     terminal.options.lineHeight = value;
   });
-  settings$.fontSize.listen((value) => {
-    terminal.options.fontSize = value;
+  combine(fontSize$, zoomLevel$).watch(([value, zoomLevel]) => {
+    terminal.options.fontSize = value * zoomLevel;
   });
-  settings$.fontFamily.listen((value) => {
+  fontFamily$.watch((value) => {
     terminal.options.fontFamily = value;
   });
+  zoomLevel$.watch((value) => {});
 
-  settings$.listen(() =>
+  settings$.watch(() =>
     setTimeout(() => {
       fixFontRender(terminal);
     }, 10),

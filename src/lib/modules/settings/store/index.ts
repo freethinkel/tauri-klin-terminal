@@ -1,7 +1,7 @@
-import { createSharedAtom } from "@/shared/helpers";
-import { computed } from "nanostores";
+import { createSharedStore } from "@/shared/helpers";
 import type { SettingsStore } from "./types";
 import { CORE_THEMES } from "./core/themes";
+import { createEvent, sample } from "effector";
 
 const DEFAULT: SettingsStore = {
   themes: [...CORE_THEMES],
@@ -13,41 +13,75 @@ const DEFAULT: SettingsStore = {
   isAutoHideToolbar: false,
   isEnabledFancyBackground: false,
   isEnabledTerminalContextMenu: true,
+  zoomLevel: 1,
 };
 
-const store = createSharedAtom(
+const settings$ = createSharedStore(
   "settings",
   { ...DEFAULT },
-  { restoreMap: (store) => ({ ...store, themes: DEFAULT.themes }) },
+  {
+    restoreMap: (store) => ({ ...store, themes: DEFAULT.themes, zoomLevel: 1 }),
+  },
 );
 
-const useChangeKey =
-  <K extends keyof SettingsStore>(key: K) =>
-  (value: SettingsStore[K]) =>
-    store.set({ ...store.get(), [key]: value });
+const themes$ = settings$.map((value) => value.themes);
+const currentTheme$ = settings$.map((value) =>
+  value.themes.find((theme) => theme.name === value.currentThemeName),
+);
+const isAutoHideToolbar$ = settings$.map((value) => value.isAutoHideToolbar);
+const isEnabledFancyBackground$ = settings$.map(
+  (value) => value.isEnabledFancyBackground,
+);
+const isEnabledTerminalContextMenu$ = settings$.map(
+  (value) => value.isEnabledTerminalContextMenu,
+);
 
-export const settings$ = {
-  subscribe: store.subscribe,
-  listen: store.listen,
-  themes: computed(store, (value) => value.themes),
-  currentTheme: computed(store, (value) =>
-    value.themes.find((theme) => theme.name === value.currentThemeName),
-  ),
-  isAutoHideToolbar: computed(store, (value) => value.isAutoHideToolbar),
-  isEnabledFancyBackground: computed(
-    store,
-    (value) => value.isEnabledFancyBackground,
-  ),
-  isEnabledTerminalContextMenu: computed(
-    store,
-    (value) => value.isEnabledTerminalContextMenu,
-  ),
-  fontFamily: computed(store, (value) => value.fontFamily),
-  fontSize: computed(store, (value) => value.fontSize),
-  lineHeight: computed(store, (value) => value.lineHeight),
-  opacity: computed(store, (value) => value.opacity),
-  handleChange: useChangeKey,
-  setTheme(theme: string) {
-    store.set({ ...store.get(), currentThemeName: theme });
-  },
+const fontFamily$ = settings$.map((value) => value.fontFamily);
+const fontSize$ = settings$.map((value) => value.fontSize);
+const lineHeight$ = settings$.map((value) => value.lineHeight);
+const opacity$ = settings$.map((value) => value.opacity);
+const zoomLevel$ = settings$.map((value) => value.zoomLevel);
+
+type PickSettings<K extends keyof typeof DEFAULT = keyof typeof DEFAULT> = {
+  key: K;
+  value: (typeof DEFAULT)[K];
+};
+
+const setTheme = createEvent<string>();
+const changeSettings = createEvent<PickSettings>();
+
+sample({
+  clock: changeSettings,
+  source: settings$,
+  fn: (store, payload) => ({
+    ...store,
+    [payload.key]: payload.value,
+  }),
+  target: settings$,
+});
+
+sample({
+  clock: setTheme,
+  source: settings$,
+  fn: (store, theme) => ({
+    ...store,
+    currentThemeName: theme,
+  }),
+  target: settings$,
+});
+
+export {
+  settings$,
+  themes$,
+  currentTheme$,
+  isAutoHideToolbar$,
+  isEnabledFancyBackground$,
+  isEnabledTerminalContextMenu$,
+  fontFamily$,
+  fontSize$,
+  lineHeight$,
+  opacity$,
+  zoomLevel$,
+  changeSettings,
+  setTheme,
 };

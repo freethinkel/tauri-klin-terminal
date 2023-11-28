@@ -1,7 +1,7 @@
 {
   "name": "klin-terminal",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,16 +11,18 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@nanostores/persistent": "^0.9.1",
     "@tauri-apps/api": "^1.4.0",
+    "effector": "^22.8.7",
+    "hotkeys-js": "^3.12.2",
+    "klin-terminal": "link:",
     "nanoid": "^4.0.2",
-    "nanostores": "^0.9.3",
     "polished": "^4.2.2",
     "svelte-splitpanes": "^0.8.0",
     "tauri-plugin-pty": "file:./tauri-plugin-pty",
     "xterm": "^5.2.1",
     "xterm-addon-fit": "^0.7.0",
     "xterm-addon-ligatures": "^0.6.0",
+    "xterm-addon-unicode11": "^0.6.0",
     "xterm-addon-webgl": "^0.15.0"
   },
   "devDependencies": {
