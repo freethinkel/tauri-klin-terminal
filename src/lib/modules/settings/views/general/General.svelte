@@ -1,15 +1,19 @@
 <script lang="ts">
-  import { Input } from "@/shared/components/input";
-  import { settings$ } from "../../store";
-  import RangeSlider from "@/shared/components/range-slider/RangeSlider.svelte";
+  import {
+    fontSize$,
+    fontFamily$,
+    lineHeight$,
+    opacity$,
+    changeSettings,
+  } from "../../store";
   import { SettingsCard } from "../../components/settings-card";
   import { ControlInput } from "../../components/control-input";
   import { ControlSlider } from "../../components/control-slider";
 
-  const fontFamily = settings$.fontFamily;
-  const fontSize = settings$.fontSize;
-  const lineHeight = settings$.lineHeight;
-  const opacity = settings$.opacity;
+  const fontFamily = fontFamily$;
+  const fontSize = fontSize$;
+  const lineHeight = lineHeight$;
+  const opacity = opacity$;
 </script>
 
 <SettingsCard title="Text">
@@ -17,7 +21,8 @@
     title="Font family"
     placeholder="Enter font family"
     value={$fontFamily}
-    on:change={({ detail }) => settings$.handleChange("fontFamily")(detail)}
+    on:change={({ detail }) =>
+      changeSettings({ key: "fontFamily", value: detail })}
   />
   <ControlInput
     title="Font size"
@@ -27,7 +32,7 @@
     max={25}
     step={1}
     on:change={({ detail }) =>
-      settings$.handleChange("fontSize")(Number(detail) || 13)}
+      changeSettings({ key: "fontSize", value: Number(detail) || 13 })}
   />
   <ControlInput
     title="Line height"
@@ -37,7 +42,7 @@
     step={0.1}
     value={$lineHeight.toString()}
     on:change={({ detail }) =>
-      settings$.handleChange("lineHeight")(Number(detail) || 1)}
+      changeSettings({ key: "lineHeight", value: Number(detail) || 1 })}
   />
 </SettingsCard>
 <SettingsCard title="Background">
@@ -45,6 +50,7 @@
     title="Opacity"
     value={$opacity}
     showValue={Math.ceil($opacity * 100).toString()}
-    on:change={({ detail }) => settings$.handleChange("opacity")(detail)}
+    on:change={({ detail }) =>
+      changeSettings({ key: "opacity", value: detail })}
   />
 </SettingsCard>

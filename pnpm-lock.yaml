@@ -1,18 +1,21 @@
 lockfileVersion: '6.0'
 
 dependencies:
-  '@nanostores/persistent':
-    specifier: ^0.9.1
-    version: 0.9.1(nanostores@0.9.3)
   '@tauri-apps/api':
     specifier: ^1.4.0
     version: 1.4.0
+  effector:
+    specifier: ^22.8.7
+    version: 22.8.7
+  hotkeys-js:
+    specifier: ^3.12.2
+    version: 3.12.2
+  klin-terminal:
+    specifier: 'link:'
+    version: 'link:'
   nanoid:
     specifier: ^4.0.2
     version: 4.0.2
-  nanostores:
-    specifier: ^0.9.3
-    version: 0.9.3
   polished:
     specifier: ^4.2.2
     version: 4.2.2
@@ -29,6 +32,9 @@ dependencies:
     specifier: ^0.7.0
     version: 0.7.0(xterm@5.2.1)
   xterm-addon-ligatures:
+    specifier: ^0.6.0
+    version: 0.6.0(xterm@5.2.1)
+  xterm-addon-unicode11:
     specifier: ^0.6.0
     version: 0.6.0(xterm@5.2.1)
   xterm-addon-webgl:
@@ -320,15 +326,6 @@ packages:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.0
       '@jridgewell/sourcemap-codec': 1.4.14
-
-  /@nanostores/persistent@0.9.1(nanostores@0.9.3):
-    resolution: {integrity: sha512-ow57Hxm5VMaI5GHET/cVk8hX/iKMmbhcGrB9owfN8p8OHiiJgUlYxe1giacwlAALJXAh2t8bxXh42hHb64BCEA==}
-    engines: {node: ^16.0.0 || ^18.0.0 || >=20.0.0}
-    peerDependencies:
-      nanostores: ^0.9.0
-    dependencies:
-      nanostores: 0.9.3
-    dev: false
 
   /@nodelib/fs.scandir@2.1.5:
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -682,6 +679,11 @@ packages:
     resolution: {integrity: sha512-uQpJaLQX2CKVnN27YvN4sL4pXyEFGAv00y4zgrC46H0EBHrDhJc/8OsT2CQ5/6yz6+d+u8ACGd9bo4v83FNVlg==}
     dev: true
 
+  /effector@22.8.7:
+    resolution: {integrity: sha512-vCevjxmFwnZJuRGtqjwfi+sHtu+7gK3qdbv4fxi/AsMdDtoMeoz9C3/28pjNABviZeEARj6ZfAHbNAq5i9d7RQ==}
+    engines: {node: '>=11.0.0'}
+    dev: false
+
   /electron-to-chromium@1.4.594:
     resolution: {integrity: sha512-xT1HVAu5xFn7bDfkjGQi9dNpMqGchUkebwf1GL7cZN32NSwwlHRPMSDJ1KN6HkS0bWUtndbSQZqvpQftKG2uFQ==}
     dev: true
@@ -824,6 +826,10 @@ packages:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
     dev: true
 
+  /hotkeys-js@3.12.2:
+    resolution: {integrity: sha512-Fi1g0SaDMJZosXLQzs7pbFj2T9VTwvJWx0e4dURXJqa9ERhd4q9fj3XXzgKQgyEnULZh88aQl5fiMv/vxzrEBQ==}
+    dev: false
+
   /immutable@4.3.1:
     resolution: {integrity: sha512-lj9cnmB/kVS0QHsJnYKD1uo3o39nrbKxszjnqS9Fr6NB7bZzW45U6WSGBPKXDL/CvDKqDNPA4r3DoDQ8GTxo2A==}
     dev: true
@@ -961,11 +967,6 @@ packages:
     resolution: {integrity: sha512-7ZtY5KTCNheRGfEFxnedV5zFiORN1+Y1N6zvPTnHQd8ENUvfaDBeuJDZb2bN/oXwXxu3qkTXDzy57W5vAmDTBw==}
     engines: {node: ^14 || ^16 || >=18}
     hasBin: true
-    dev: false
-
-  /nanostores@0.9.3:
-    resolution: {integrity: sha512-KobZjcVyNndNrb5DAjfs0WG0lRcZu5Q1BOrfTOxokFLi25zFrWPjg+joXC6kuDqNfSt9fQwppyjUBkRPtsL+8w==}
-    engines: {node: ^16.0.0 || ^18.0.0 || >=20.0.0}
     dev: false
 
   /node-releases@2.0.13:
@@ -1473,6 +1474,14 @@ packages:
     dependencies:
       font-finder: 1.1.0
       font-ligatures: 1.4.1
+      xterm: 5.2.1
+    dev: false
+
+  /xterm-addon-unicode11@0.6.0(xterm@5.2.1):
+    resolution: {integrity: sha512-5pkb8YoS/deRtNqQRw8t640mu+Ga8B2MG3RXGQu0bwgcfr8XiXIRI880TWM49ICAHhTmnOLPzIIBIjEnCq7k2A==}
+    peerDependencies:
+      xterm: ^5.0.0
+    dependencies:
       xterm: 5.2.1
     dev: false
 

@@ -1,8 +1,13 @@
-import { atom, computed } from "nanostores";
 import { nanoid } from "nanoid";
 import { TerminalController, type TerminalTab } from "./types";
-import { settings$ } from "@/modules/settings/store";
 import { createTerminal } from "./terminal";
+import {
+  combine,
+  createEffect,
+  createEvent,
+  createStore,
+  sample,
+} from "effector";
 
 const createTab = (): TerminalTab => {
   return {
@@ -10,60 +15,137 @@ const createTab = (): TerminalTab => {
     terminalController: new TerminalController(createTerminal()),
   };
 };
-
 const _initialTab = createTab();
 
-const DEFAULT = {
-  tabs: <TerminalTab[]>[_initialTab],
-  currentTabId: _initialTab.id,
-};
+const tabs$ = createStore([_initialTab]);
+const currentTabId$ = createStore(_initialTab.id);
 
-const store = atom({ ...DEFAULT });
+const currentTab$ = combine(tabs$, currentTabId$, (tabs, id) =>
+  tabs.find((tab) => tab.id === id),
+);
 
-export const tabs$ = {
-  tabs: computed(store, (value) => value.tabs),
-  currentTab: computed(store, (value) =>
-    value.tabs.find((tab) => tab.id === value.currentTabId)
-  ),
-  setTitle(id: string, newTitle: string) {
-    const tabs = store
-      .get()
-      .tabs.map((tab) => (tab.id === id ? { ...tab, title: newTitle } : tab));
+const selectTab = createEvent<TerminalTab>();
+const closeTab = createEvent<TerminalTab>();
+const addNewTab = createEvent();
+const setTitle = createEvent<{ tabId: string; title: string }>();
+const selectNextTab = createEvent();
+const selectPrevTab = createEvent();
+// Internal actions
+const newTabCreated = createEvent<TerminalTab>();
+const tabClosed = createEvent<{ newTab: TerminalTab; tabs: TerminalTab[] }>();
 
-    store.set({
-      ...store.get(),
-      tabs,
-    });
+const asyncTerminalFocusFx = createEffect((terminal: TerminalController) => {
+  setTimeout(() => {
+    terminal.focus();
+  });
+});
+
+sample({
+  clock: selectNextTab,
+  source: {
+    currentTab: currentTab$,
+    tabs: tabs$,
   },
-  selectTab(id: string) {
-    setTimeout(() => {
-      const tab = store.get().tabs.find((tab) => tab.id === id);
-      tab.terminalController.focus();
-    });
-    store.set({ ...store.get(), currentTabId: id });
-  },
-  closeTab(id: string) {
-    const tabIndex = store
-      .get()
-      .tabs.indexOf(store.get().tabs.find((tab) => tab.id === id));
-    const newTab = store.get().tabs.at(tabIndex - 1);
+  fn: ({ tabs, currentTab }) => {
+    const currentTabIndex = tabs.indexOf(currentTab);
+    const newTabIndex =
+      currentTabIndex + 1 === tabs.length ? 0 : currentTabIndex + 1;
 
-    store.set({
-      ...store.get(),
-      tabs: store.get().tabs.filter((tab) => tab.id !== id),
-      currentTabId: newTab.id,
-    });
+    return tabs[newTabIndex];
   },
-  addNewTab() {
-    const newTab = createTab();
-    store.set({
-      ...store.get(),
-      tabs: [...store.get().tabs, newTab],
-      currentTabId: newTab.id,
-    });
+  target: selectTab,
+});
 
-    setTimeout(() => {
-      newTab.terminalController.focus();
-    });
+sample({
+  clock: selectPrevTab,
+  source: {
+    currentTab: currentTab$,
+    tabs: tabs$,
   },
+  fn: ({ tabs, currentTab }) => {
+    const currentTabIndex = tabs.indexOf(currentTab);
+    const newTabIndex =
+      currentTabIndex == 0 ? tabs.length - 1 : currentTabIndex - 1;
+
+    return tabs[newTabIndex];
+  },
+  target: selectTab,
+});
+
+sample({
+  clock: selectTab,
+  fn: (tab) => tab.id,
+  target: currentTabId$,
+});
+
+sample({
+  clock: selectTab,
+  fn: (tab) => tab.terminalController,
+  target: asyncTerminalFocusFx,
+});
+
+sample({
+  clock: closeTab,
+  source: tabs$,
+  fn: (tabs, closedTab) => {
+    const tabIndex = tabs.indexOf(tabs.find((tab) => tab.id === closedTab.id));
+    const newTab = tabs.at(tabIndex - 1);
+
+    return {
+      tabs: tabs.filter((tab) => tab.id !== closedTab.id),
+      newTab,
+    };
+  },
+  target: tabClosed,
+});
+
+sample({
+  clock: tabClosed,
+  fn: (event) => event.newTab,
+  target: selectTab,
+});
+
+sample({
+  clock: tabClosed,
+  fn: (event) => event.tabs,
+  target: tabs$,
+});
+
+sample({
+  clock: addNewTab,
+  fn: () => createTab(),
+  target: newTabCreated,
+});
+
+sample({
+  clock: newTabCreated,
+  source: tabs$,
+  fn: (tabs, newTab) => [...tabs, newTab],
+  target: tabs$,
+});
+
+sample({
+  clock: newTabCreated,
+  target: selectTab,
+});
+
+sample({
+  clock: setTitle,
+  source: tabs$,
+  fn: (tabs, event) =>
+    tabs.map((tab) =>
+      tab.id === event.tabId ? { ...tab, title: event.title } : tab,
+    ),
+  target: tabs$,
+});
+
+export {
+  tabs$,
+  currentTab$,
+  selectTab,
+  addNewTab,
+  closeTab,
+  setTitle,
+  selectPrevTab,
+  selectNextTab,
 };

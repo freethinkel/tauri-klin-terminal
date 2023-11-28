@@ -10,4 +10,5 @@ export type SettingsStore = {
   isAutoHideToolbar: boolean;
   isEnabledFancyBackground: boolean;
   isEnabledTerminalContextMenu: boolean;
+  zoomLevel: number;
 };

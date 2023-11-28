@@ -1762,7 +1762,7 @@ dependencies = [
 
 [[package]]
 name = "klin-terminal"
-version = "0.0.0"
+version = "1.0.0"
 dependencies = [
  "cocoa",
  "core-foundation",

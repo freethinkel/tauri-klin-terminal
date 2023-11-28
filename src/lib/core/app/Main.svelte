@@ -3,6 +3,7 @@
   import { listen } from "@tauri-apps/api/event";
   import { WebviewWindow } from "@tauri-apps/api/window";
   import { onMount } from "svelte";
+  import ShortcutsConnector from "./ShortcutsConnector.svelte";
 
   onMount(() => {
     listen("on_menu_event", (event) => {
@@ -13,4 +14,6 @@
   });
 </script>
 
-<TerminalApp />
+<ShortcutsConnector>
+  <TerminalApp />
+</ShortcutsConnector>

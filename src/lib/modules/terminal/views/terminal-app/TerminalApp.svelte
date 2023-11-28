@@ -1,22 +1,29 @@
 <script lang="ts">
-  import { Terminal } from "@/modules/terminal/components/terminal";
   import { Tab } from "@/shared/components/tab";
-  import { tabs$ } from "../../store";
+  import {
+    addNewTab,
+    closeTab,
+    currentTab$,
+    selectTab,
+    tabs$,
+  } from "../../store";
   import { Button } from "@/shared/components/button";
   import { Icon } from "@/shared/components/icon";
   import { getPlatform } from "@/shared/helpers";
-  import { TerminalContextMenu } from "../../components/terminal-context-menu";
   import { onMount } from "svelte";
-  import { settings$ } from "@/modules/settings/store";
+  import {
+    isAutoHideToolbar$,
+    isEnabledFancyBackground$,
+  } from "@/modules/settings/store";
   import { invoke } from "@tauri-apps/api";
   import { Gradient } from "@/modules/terminal/components/gradient";
   import { TabView } from "../tab-view";
 
-  const tabs = tabs$.tabs;
-  const currentTab = tabs$.currentTab;
+  const tabs = tabs$;
+  const currentTab = currentTab$;
   let platform = "browser";
-  const isAutoHideToolbar = settings$.isAutoHideToolbar;
-  const isEnabledFancyBackground = settings$.isEnabledFancyBackground;
+  const isAutoHideToolbar = isAutoHideToolbar$;
+  const isEnabledFancyBackground = isEnabledFancyBackground$;
 
   onMount(async () => {
     platform = await getPlatform();
@@ -40,21 +47,22 @@
       <Tab
         onlyOne={$tabs.length === 1}
         active={tab.id === $currentTab.id}
-        on:close={() => tabs$.closeTab(tab.id)}
-        on:select={() => tabs$.selectTab(tab.id)}>{tab.title ?? ""}</Tab
+        on:close={() => closeTab(tab)}
+        on:select={() => selectTab(tab)}>{tab.title ?? ""}</Tab
       >
     {/each}
     <div class="add_tab">
-      <Button on:click={() => tabs$.addNewTab()}><Icon name="plus" /></Button>
+      <Button on:click={() => addNewTab()}><Icon name="plus" /></Button>
     </div>
   </div>
   <div class="view">
     {#each $tabs as tab}
-      {#key tab.id}
-        {#if tab.id === $currentTab.id}
-          <TabView {tab} />
-        {/if}
-      {/key}
+      <div
+        class="tab__view"
+        class:tab__view__active={tab.id === $currentTab.id}
+      >
+        <TabView {tab} />
+      </div>
     {/each}
   </div>
 </div>
@@ -104,6 +112,7 @@
     min-height: 0;
     display: flex;
     background-color: var(--color-background);
+    position: relative;
   }
   .add_tab {
     --size: 18px;
@@ -112,5 +121,16 @@
     height: 32px;
     width: 32px;
     justify-content: center;
+  }
+
+  .tab__view {
+    position: absolute;
+    top: 0;
+    left: -9999em; /* Offscreen to pause xterm rendering, thanks to IntersectionObserver */
+    width: 100%;
+    height: 100%;
+  }
+  .tab__view__active {
+    left: 0;
   }
 </style>

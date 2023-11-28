@@ -1,12 +1,18 @@
 <script lang="ts">
   import { ThemeCard } from "../../components/theme-card";
-  import { settings$ } from "../../store";
+  import {
+    themes$,
+    currentTheme$,
+    isEnabledFancyBackground$,
+    changeSettings,
+    setTheme,
+  } from "../../store";
   import { SettingsCard } from "../../components/settings-card";
   import { ControlSwitch } from "../../components/control-switch";
 
-  const themes = settings$.themes;
-  const currentTheme = settings$.currentTheme;
-  const isEnabledFancyBackground = settings$.isEnabledFancyBackground;
+  const themes = themes$;
+  const currentTheme = currentTheme$;
+  const isEnabledFancyBackground = isEnabledFancyBackground$;
 </script>
 
 <SettingsCard>
@@ -14,7 +20,7 @@
     title="Enable fancy background"
     value={$isEnabledFancyBackground}
     on:change={({ detail }) =>
-      settings$.handleChange("isEnabledFancyBackground")(detail)}
+      changeSettings({ key: "isEnabledFancyBackground", value: detail })}
   />
 </SettingsCard>
 
@@ -22,7 +28,7 @@
   <div class="themes">
     {#each $themes as theme}
       <ThemeCard
-        on:select={() => settings$.setTheme(theme.name)}
+        on:select={() => setTheme(theme.name)}
         {theme}
         active={theme.name === $currentTheme.name}
       />

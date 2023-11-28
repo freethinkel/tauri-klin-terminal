@@ -67,14 +67,7 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![change_toolbar])
         .plugin(tauri_plugin_pty::init())
-        .menu(
-            Menu::new()
-                .add_default_app_submenu_if_macos(&ctx.package_info().name)
-                .add_default_file_submenu()
-                .add_default_edit_submenu()
-                .add_default_view_submenu()
-                .add_default_window_submenu(),
-        )
+        .menu(AddDefaultSubmenus::default())
         .on_menu_event(|event| {
             let window = event.window();
             let _ = window.emit("on_menu_event", event.menu_item_id());

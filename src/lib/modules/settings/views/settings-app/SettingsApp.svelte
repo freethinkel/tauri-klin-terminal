@@ -4,6 +4,7 @@
   import { Themes } from "../themes";
   import { General } from "../general";
   import { Advanced } from "../advanced";
+  import { Keymaps } from "../keymaps";
 
   const sections = [
     {
@@ -19,6 +20,7 @@
     {
       icon: "keyboard",
       text: "Keymaps",
+      view: Keymaps,
     },
     {
       icon: "tools",

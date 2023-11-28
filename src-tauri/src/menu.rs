@@ -1,137 +1,103 @@
-use serde::Serialize;
-use tauri::{CustomMenuItem, Manager, Menu, MenuItem, Submenu, WindowMenuEvent, Wry};
+use tauri::{AboutMetadata, CustomMenuItem, Menu, MenuItem, Submenu};
 
 pub trait AddDefaultSubmenus {
-    fn add_default_app_submenu_if_macos(self, app_name: &str) -> Self;
-    fn add_default_file_submenu(self) -> Self;
-    fn add_default_edit_submenu(self) -> Self;
-    fn add_default_view_submenu(self) -> Self;
-    fn add_default_window_submenu(self) -> Self;
+    fn default() -> Self;
+    fn add_default_submenu(self, submenu: SubmenuKind) -> Self;
 }
-
-#[derive(Serialize, Clone)]
-pub struct DOMKeyboardEvent {
-    #[serde(rename = "metaKey")]
-    meta_key: bool,
-    key: String,
+enum SubmenuKind {
+    App,
+    File,
+    Edit,
+    View,
+    Window,
 }
 
 impl AddDefaultSubmenus for Menu {
-    fn add_default_app_submenu_if_macos(self, app_name: &str) -> Menu {
-        #[cfg(target_os = "macos")]
-        return self.add_submenu(Submenu::new(
-            app_name.to_string(),
-            Menu::new()
-                .add_item(
-                    CustomMenuItem::new("settings".to_string(), "Settings").accelerator("Cmd+,"),
-                )
-                // .add_native_item(MenuItem::About(app_name.to_string()))
-                .add_native_item(MenuItem::Separator)
-                .add_native_item(MenuItem::Separator)
-                .add_native_item(MenuItem::Hide)
-                .add_native_item(MenuItem::HideOthers)
-                .add_native_item(MenuItem::ShowAll)
-                .add_native_item(MenuItem::Separator)
-                .add_native_item(MenuItem::Quit),
-        ));
-        #[cfg(not(target_os = "macos"))]
-        return self;
-    }
-    fn add_default_file_submenu(self) -> Menu {
-        self.add_submenu(Submenu::new(
-            "Файл",
-            Menu::new().add_native_item(MenuItem::CloseWindow),
-        ))
+    fn default() -> Menu {
+        let menu = Menu::new()
+            .add_default_submenu(SubmenuKind::App)
+            .add_default_submenu(SubmenuKind::File)
+            .add_default_submenu(SubmenuKind::Edit)
+            .add_default_submenu(SubmenuKind::View)
+            .add_default_submenu(SubmenuKind::Window);
+
+        return menu.clone();
     }
 
-    fn add_default_edit_submenu(self) -> Menu {
-        self.add_submenu(Submenu::new("Правка", {
-            let mut menu = Menu::new()
-                .add_native_item(MenuItem::Undo)
-                .add_native_item(MenuItem::Redo)
-                .add_native_item(MenuItem::Separator)
-                .add_native_item(MenuItem::Cut)
-                .add_native_item(MenuItem::Copy)
-                .add_native_item(MenuItem::Paste);
-            #[cfg(not(target_os = "macos"))]
+    fn add_default_submenu(self, submenu: SubmenuKind) -> Self {
+        match submenu {
+            SubmenuKind::App =>
             {
+                #[cfg(target_os = "macos")]
+                self.add_submenu(Submenu::new(
+                    "Klin",
+                    Menu::new()
+                        .add_native_item(MenuItem::About("Klin".to_string(), AboutMetadata::new()))
+                        .add_native_item(MenuItem::Separator)
+                        .add_item(
+                            CustomMenuItem::new("settings".to_string(), "Settings")
+                                .accelerator("Cmd+,"),
+                        )
+                        .add_native_item(MenuItem::Services)
+                        .add_native_item(MenuItem::Separator)
+                        .add_native_item(MenuItem::Hide)
+                        .add_native_item(MenuItem::HideOthers)
+                        .add_native_item(MenuItem::ShowAll)
+                        .add_native_item(MenuItem::Separator)
+                        .add_native_item(MenuItem::Quit),
+                ))
+            }
+
+            SubmenuKind::File => self.add_submenu(Submenu::new(
+                "File",
+                #[cfg(target_os = "macos")]
+                {
+                    Menu::new().add_native_item(MenuItem::CloseWindow);
+                    Menu::new().add_native_item(MenuItem::Quit)
+                },
+            )),
+
+            SubmenuKind::Edit => self.add_submenu(Submenu::new("Edit", {
+                let mut menu = Menu::new();
+                menu = menu.add_native_item(MenuItem::Undo);
+                menu = menu.add_native_item(MenuItem::Redo);
                 menu = menu.add_native_item(MenuItem::Separator);
-            }
-            menu = menu.add_native_item(MenuItem::SelectAll);
-            // macOS automatically adds "Start Dictation" and "Emoji & Symbols" to
-            // the bottom of the Edit menu
-            menu
-        }))
-    }
+                menu = menu.add_native_item(MenuItem::Cut);
+                menu = menu.add_native_item(MenuItem::Copy);
+                menu = menu.add_native_item(MenuItem::Paste);
+                #[cfg(not(target_os = "macos"))]
+                {
+                    menu = menu.add_native_item(MenuItem::Separator);
+                }
+                menu = menu.add_native_item(MenuItem::SelectAll);
+                menu
+            })),
 
-    fn add_default_view_submenu(self) -> Menu {
-        let mut view_menu = Menu::new().add_native_item(MenuItem::EnterFullScreen);
-        view_menu = view_menu.add_item(
-            CustomMenuItem::new("toggle_devtools".to_string(), "Toggle Developer Tools")
-                .accelerator("CmdOrCtrl+Alt+I"),
-        );
-        self.add_submenu(Submenu::new("Вид", view_menu))
-    }
+            SubmenuKind::View => self.add_submenu(Submenu::new("View", {
+                let mut view_menu = Menu::new().add_native_item(MenuItem::EnterFullScreen);
 
-    fn add_default_window_submenu(self) -> Menu {
-        self.add_submenu(Submenu::new(
-            "Окно",
-            Menu::new()
-                .add_native_item(MenuItem::Minimize)
-                .add_native_item(MenuItem::Zoom),
-        ))
-    }
-}
+                view_menu = view_menu.add_item(
+                    CustomMenuItem::new("reset_zoom_level".to_string(), "Reset zoom level")
+                        .accelerator("CmdOrCtrl+0"),
+                );
+                view_menu = view_menu.add_item(
+                    CustomMenuItem::new("increaze_zoom_level".to_string(), "Zoom in")
+                        .accelerator("CmdOrCtrl+Plus"),
+                );
+                view_menu = view_menu.add_item(
+                    CustomMenuItem::new("decrease_zoom_level".to_string(), "Zoom out")
+                        .accelerator("CmdOrCtrl+-"),
+                );
 
-pub(crate) fn handle_menu_event(event: WindowMenuEvent<Wry>) {
-    match event.menu_item_id() {
-        "quit" => {
-            let app = event.window().app_handle();
-            app.exit(0);
+                view_menu
+            })),
+
+            SubmenuKind::Window => self.add_submenu(Submenu::new("Window", {
+                let menu = Menu::new()
+                    .add_native_item(MenuItem::Minimize)
+                    .add_native_item(MenuItem::Zoom);
+                menu
+            })), // SubmenuKind::Help(url) => {
         }
-        "open_settings" => event
-            .window()
-            .emit(
-                "do_keyboard_input",
-                DOMKeyboardEvent {
-                    meta_key: true,
-                    key: ",".into(),
-                },
-            )
-            .unwrap(),
-        "close" => {
-            let window = event.window();
-
-            #[cfg(debug_assertions)]
-            if window.is_devtools_open() {
-                window.close_devtools();
-            } else {
-                window.close().unwrap();
-            }
-
-            #[cfg(not(debug_assertions))]
-            window.close().unwrap();
-        }
-        "open_search" => event
-            .window()
-            .emit(
-                "do_keyboard_input",
-                DOMKeyboardEvent {
-                    meta_key: true,
-                    key: "l".into(),
-                },
-            )
-            .unwrap(),
-        #[cfg(debug_assertions)]
-        "toggle_devtools" => {
-            let window = event.window();
-
-            if window.is_devtools_open() {
-                window.close_devtools();
-            } else {
-                window.open_devtools();
-            }
-        }
-        _ => {}
     }
 }
