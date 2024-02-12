@@ -1,10 +1,8 @@
 use std::ffi::c_void;
-use std::io::{Read, Write};
+use std::io::{BufRead, BufReader, Read, Write};
 use std::str;
 use std::{env, slice};
 
-use cocoa::base::nil;
-use cocoa::foundation::{NSData, NSString};
 use futures::{SinkExt, StreamExt};
 use futures_util::TryFutureExt;
 use mt_logger::*;
@@ -12,10 +10,9 @@ use portable_pty::{native_pty_system, CommandBuilder, PtySize};
 use serde::Deserialize;
 use serde_json::{json, Value};
 use tokio::net::{TcpListener, TcpStream};
+use tokio::sync::Mutex;
 use tokio_tungstenite::accept_async;
 use tokio_tungstenite::tungstenite::Message;
-
-// use crate::settings::settings::get_settings;
 
 const PTY_SERVER_ADDRESS: &str = "127.0.0.1:7703";
 const TERM: &str = "xterm-256color";
@@ -26,9 +23,7 @@ const fn c(bytes: &[u8]) -> &core::ffi::CStr {
 
 #[derive(Deserialize, Debug)]
 struct WindowSize {
-    /// The number of lines of text
     pub rows: u16,
-    /// The number of columns of text
     pub cols: u16,
 }
 
@@ -53,10 +48,7 @@ async fn handle_client(stream: TcpStream) {
 
         cmd
     } else {
-        // let settings = get_settings();
         let username = env::var("USER").unwrap();
-
-        // mt_log!(Level::Info, "user_default_shell={}", user_default_shell);
 
         let mut cmd = CommandBuilder::new("login");
         cmd.args(["-fp", username.as_str()]);
@@ -73,26 +65,15 @@ async fn handle_client(stream: TcpStream) {
 
     std::thread::spawn(move || {
         let rt = tokio::runtime::Runtime::new().unwrap();
+
         rt.block_on(async {
-            let mut buf = [0u8; 1024];
-
             loop {
-                let size = match pty_reader.read(&mut buf) {
-                    Ok(size) => size,
-                    Err(err) => {
-                        eprintln!("Error reading from pty: {:?}", err);
-                        break;
-                    }
-                };
-
-                if size == 0 {
-                    break;
-                }
-
-                let output = buf[0..size].to_vec();
+                let mut temp_buffer = [0; 2048];
+                let size = pty_reader.read(&mut temp_buffer).unwrap_or(0);
+                let output = String::from_utf8_lossy(&temp_buffer[..size]).to_string();
 
                 ws_sender
-                    .send(Message::Binary(output))
+                    .send(Message::Text(output))
                     .await
                     .expect("Failed to send message over WebSocket");
             }

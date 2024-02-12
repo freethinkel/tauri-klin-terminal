@@ -16,6 +16,7 @@ export declare class TauriPtyAddon implements ITerminalAddon {
     private _flushBuffer;
     private _pushToBuffer;
     _arrayBufferToString(buf: ArrayBuffer): string;
+    prevData: any;
     private _getMessage;
     deatach(): void;
     activate(terminal: Terminal): void;

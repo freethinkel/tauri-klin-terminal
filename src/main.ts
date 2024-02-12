@@ -1,19 +1,19 @@
 import "./styles.css";
-import { initTheme } from "@/shared/helpers/themes";
+import { initTheme } from "@/helpers/themes";
 import { appWindow } from "@tauri-apps/api/window";
 
 const label = appWindow.label;
 
+const targetElement = document.getElementById("app")!;
+
 const apps = {
   main: () =>
-    import("@/core/app/Main.svelte").then(
-      (module) =>
-        new module.default({ target: document.getElementById("app") }),
+    import("@/application/TerminalApp.svelte").then(
+      (module) => new module.default({ target: targetElement }),
     ),
   settings: () =>
-    import("@/core/app/Settings.svelte").then(
-      (module) =>
-        new module.default({ target: document.getElementById("app") }),
+    import("@/application/Settings.svelte").then(
+      (module) => new module.default({ target: targetElement }),
     ),
 };
 

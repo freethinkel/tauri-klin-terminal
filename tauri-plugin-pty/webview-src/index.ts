@@ -27,7 +27,7 @@ export class TauriPtyAddon implements ITerminalAddon {
       this.terminal!.onData((data: string) => this.sendData(data));
     }
     this.terminal!.onResize((data: { cols: number; rows: number }) =>
-      this._setSize(data),
+      this._setSize(data)
     );
     this.socket.addEventListener("close", () => this.deatach());
     this.socket.addEventListener("error", () => this.deatach());
@@ -35,7 +35,7 @@ export class TauriPtyAddon implements ITerminalAddon {
 
   private _setSize({ cols, rows }: { rows: number; cols: number }) {
     const data = new TextEncoder().encode(
-      "\x01" + JSON.stringify({ cols, rows }),
+      "\x01" + JSON.stringify({ cols, rows })
     );
     this.socket.send(data);
   }
@@ -62,16 +62,20 @@ export class TauriPtyAddon implements ITerminalAddon {
     return String.fromCharCode.apply("", new Uint8Array(buf) as any);
   }
 
+  prevData: any = null;
   private async _getMessage(ev: MessageEvent): Promise<void> {
     try {
-      const bytes = new Uint8Array(ev.data);
-      const data = new TextDecoder("utf-8").decode(bytes).replace(/�/gim, "");
+      // const bytes = new Uint8Array(ev.data);
+
+      const data = ev.data;
+      // const data = new TextDecoder().decode(ev.data);
 
       if (this.options!.buffered) {
         this._pushToBuffer(data);
       } else {
         this.terminal!.write(data);
       }
+      this.prevData = ev.data;
     } catch (err) {
       console.log(err);
     }

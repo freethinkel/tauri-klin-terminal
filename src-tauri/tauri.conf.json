@@ -26,6 +26,16 @@
     },
     "allowlist": {
       "all": true,
+      "shell": {
+        "all": true,
+        "scope": [
+          {
+            "name": "node",
+            "cmd": "node",
+            "args": true
+          }
+        ]
+      },
       "globalShortcut": {
         "all": true
       }

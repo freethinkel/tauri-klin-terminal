@@ -3681,12 +3681,9 @@ name = "tauri-plugin-pty"
 version = "0.0.0"
 dependencies = [
  "bytes",
- "cocoa",
- "core-foundation",
  "futures",
  "futures-util",
  "mt_logger",
- "objc",
  "portable-pty",
  "serde",
  "serde_json",
